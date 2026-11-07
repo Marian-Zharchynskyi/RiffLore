@@ -25,7 +25,7 @@ export function StudioHeader() {
   const { streakDays, xp, reviewQueue } = useProgressStore();
 
   const [muted, setMuted] = React.useState(false);
-  const [preset, setPreset] = React.useState<SynthTonePreset>('warm-crunch');
+  const [preset, setPreset] = React.useState<SynthTonePreset>('clean-tube');
 
   const toggleMute = () => {
     const next = !muted;

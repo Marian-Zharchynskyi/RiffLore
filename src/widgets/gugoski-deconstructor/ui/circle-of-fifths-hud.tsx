@@ -15,11 +15,15 @@ interface CircleOfFifthsHudProps {
   onSelectChord?: (chordName: string) => void;
 }
 
+function roundCoord(n: number): number {
+  return Math.round(n * 1000) / 1000;
+}
+
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
   return {
-    x: cx + r * Math.cos(rad),
-    y: cy + r * Math.sin(rad),
+    x: roundCoord(cx + r * Math.cos(rad)),
+    y: roundCoord(cy + r * Math.sin(rad)),
   };
 }
 
@@ -121,8 +125,8 @@ export function CircleOfFifthsHud({
                 className="cursor-pointer transition-colors duration-200 hover:opacity-90"
               />
               <text
-                x={majLabelPos.x}
-                y={majLabelPos.y + 4}
+                x={roundCoord(majLabelPos.x)}
+                y={roundCoord(majLabelPos.y + 4)}
                 textAnchor="middle"
                 className={`pointer-events-none font-display text-[12px] font-bold ${
                   isMajActive
@@ -145,8 +149,8 @@ export function CircleOfFifthsHud({
                 className="cursor-pointer transition-colors duration-200 hover:opacity-90"
               />
               <text
-                x={minLabelPos.x}
-                y={minLabelPos.y + 3.5}
+                x={roundCoord(minLabelPos.x)}
+                y={roundCoord(minLabelPos.y + 3.5)}
                 textAnchor="middle"
                 className={`pointer-events-none font-sans text-[9.5px] font-semibold ${
                   isMinActive

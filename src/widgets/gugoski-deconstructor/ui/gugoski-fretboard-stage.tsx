@@ -10,6 +10,7 @@ interface GugoskiFretboardStageProps {
   scaleBoxFretRange: [number, number];
   scaleBoxNotes: { string: number; fret: number; label: string }[];
   activePathNodes: { string: number; fret: number; label: string }[];
+  currentPlayingCoord?: { string: number; fret: number } | null;
   neckWood: 'maple' | 'rosewood';
 }
 
@@ -21,21 +22,22 @@ export function GugoskiFretboardStage({
   scaleBoxFretRange,
   scaleBoxNotes,
   activePathNodes,
+  currentPlayingCoord,
   neckWood,
 }: GugoskiFretboardStageProps) {
   const { locale, noteNaming } = useLocaleStore();
 
   const maxFret = 12;
-  const nutWidth = 44;
-  const fretWidth = 74;
-  const topPadding = 32;
+  const nutWidth = 58;
+  const fretWidth = 72;
+  const topPadding = 34;
   const stringSpacing = 34;
   const boardHeight = stringSpacing * 5;
   const svgWidth = nutWidth + maxFret * fretWidth + 28;
   const svgHeight = topPadding + boardHeight + 38;
 
   const getFretCenterX = (fret: number) =>
-    fret === 0 ? nutWidth / 2 : nutWidth + fret * fretWidth - fretWidth / 2;
+    fret === 0 ? nutWidth / 2 - 3 : nutWidth + fret * fretWidth - fretWidth / 2;
 
   const getStringY = (stringNumber: number) =>
     topPadding + (stringNumber - 1) * stringSpacing;
@@ -43,25 +45,49 @@ export function GugoskiFretboardStage({
   const playFretSound = async (stringNum: number, fret: number) => {
     const openMidi = STANDARD_OPEN_MIDI[stringNum - 1] ?? 64;
     const noteName = Note.fromMidi(openMidi + fret);
-    await synthEngine.playNote(noteName, '4n');
+    await synthEngine.playNote(noteName, '2n');
   };
 
   // Bounding coordinates for the Green Scale Box Frame [minFret, maxFret]
   const [minBoxFret, maxBoxFret] = scaleBoxFretRange;
-  const boxLeftX = nutWidth + (minBoxFret - 1) * fretWidth + 4;
-  const boxWidth = (maxBoxFret - minBoxFret + 1) * fretWidth - 8;
+  const boxLeftX =
+    minBoxFret === 0 ? 6 : nutWidth + (minBoxFret - 1) * fretWidth + 4;
+  const boxRightX = nutWidth + maxBoxFret * fretWidth - 4;
+  const boxWidth = Math.max(48, boxRightX - boxLeftX);
 
-  // Set of active green path coordinates for quick lookup
-  const activeKeySet = new Set(
-    activePathNodes.map((n) => `s${n.string}f${n.fret}`)
-  );
+  // Merge scaleBoxNotes + any activePathNodes that might be outside the scale box (e.g. open strings or chromatic notes like D# in B7)
+  const mergedMarkers = React.useMemo(() => {
+    const map = new Map<
+      string,
+      { string: number; fret: number; label: string; isActive: boolean }
+    >();
+
+    for (const item of scaleBoxNotes) {
+      map.set(`s${item.string}f${item.fret}`, {
+        ...item,
+        isActive: false,
+      });
+    }
+
+    for (const active of activePathNodes) {
+      const key = `s${active.string}f${active.fret}`;
+      map.set(key, {
+        string: active.string,
+        fret: active.fret,
+        label: active.label,
+        isActive: true,
+      });
+    }
+
+    return Array.from(map.values());
+  }, [scaleBoxNotes, activePathNodes]);
 
   return (
     <div className="relative rounded-xl border border-white/10 bg-[#141413] p-4 shadow-xl">
       <div className="overflow-x-auto pb-2">
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          className="w-full min-w-[860px] select-none"
+          className="w-full min-w-[880px] select-none"
         >
           <defs>
             <linearGradient id="maple-neck" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -75,6 +101,28 @@ export function GugoskiFretboardStage({
               <stop offset="100%" stopColor="#140F0D" />
             </linearGradient>
           </defs>
+
+          {/* Open String (Fret 0) Zone Label & Backdrop */}
+          <rect
+            x={4}
+            y={topPadding - 14}
+            width={nutWidth - 10}
+            height={boardHeight + 28}
+            rx={4}
+            fill="rgba(255,255,255,0.03)"
+          />
+          <text
+            x={getFretCenterX(0)}
+            y={topPadding - 20}
+            textAnchor="middle"
+            className={`font-mono text-[10px] ${
+              minBoxFret === 0
+                ? 'fill-emerald-400 font-bold'
+                : 'fill-zinc-400'
+            }`}
+          >
+            0 (Open)
+          </text>
 
           {/* Fingerboard Wood Surface (Maple like Nikola Gugoski's Strat or Rosewood) */}
           <rect
@@ -104,7 +152,8 @@ export function GugoskiFretboardStage({
             const xPos = nutWidth + fretNum * fretWidth;
             const centerX = xPos - fretWidth / 2;
             const isInlay = INLAY_FRETS.has(fretNum);
-            const dotColor = neckWood === 'maple' ? '#18181B' : 'rgba(245, 158, 11, 0.3)';
+            const dotColor =
+              neckWood === 'maple' ? '#18181B' : 'rgba(245, 158, 11, 0.3)';
 
             return (
               <g key={`gugoski-fret-${fretNum}`}>
@@ -166,7 +215,7 @@ export function GugoskiFretboardStage({
             return (
               <line
                 key={`gugoski-str-${sIdx}`}
-                x1={nutWidth - 6}
+                x1={8}
                 y1={yPos}
                 x2={nutWidth + maxFret * fretWidth}
                 y2={yPos}
@@ -212,13 +261,15 @@ export function GugoskiFretboardStage({
             );
           })}
 
-          {/* SCALE BOX NOTES: Red Dots for Reference Scale Notes, Bright Green Dots for Active Path Notes */}
-          {scaleBoxNotes.map((noteItem) => {
+          {/* SCALE BOX & ACTIVE NOTES */}
+          {mergedMarkers.map((noteItem) => {
             const cx = getFretCenterX(noteItem.fret);
             const cy = getStringY(noteItem.string);
-            const isGreenActive = activeKeySet.has(
-              `s${noteItem.string}f${noteItem.fret}`
-            );
+            const isGreenActive = noteItem.isActive;
+            const isCurrentlySounding =
+              currentPlayingCoord?.string === noteItem.string &&
+              currentPlayingCoord?.fret === noteItem.fret;
+
             const displayLabel = formatNoteDisplay(
               noteItem.label,
               locale,
@@ -231,13 +282,24 @@ export function GugoskiFretboardStage({
                 onClick={() => playFretSound(noteItem.string, noteItem.fret)}
                 className="cursor-pointer group"
               >
-                <circle cx={cx} cy={cy} r={16} fill="transparent" />
+                <circle cx={cx} cy={cy} r={17} fill="transparent" />
 
-                {isGreenActive && (
+                {isCurrentlySounding && (
                   <circle
                     cx={cx}
                     cy={cy}
-                    r={16}
+                    r={18}
+                    fill="rgba(250, 204, 21, 0.25)"
+                    stroke="#FACC15"
+                    strokeWidth={2.5}
+                  />
+                )}
+
+                {isGreenActive && !isCurrentlySounding && (
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={15.5}
                     fill="none"
                     stroke="#22C55E"
                     strokeWidth={2}
@@ -248,10 +310,16 @@ export function GugoskiFretboardStage({
                 <circle
                   cx={cx}
                   cy={cy}
-                  r={isGreenActive ? 12.5 : 11}
-                  fill={isGreenActive ? '#16A34A' : '#EF4444'}
-                  stroke="#FFFFFF"
-                  strokeWidth={1.8}
+                  r={isCurrentlySounding ? 14 : isGreenActive ? 12.5 : 11}
+                  fill={
+                    isCurrentlySounding
+                      ? '#15803D'
+                      : isGreenActive
+                        ? '#16A34A'
+                        : '#EF4444'
+                  }
+                  stroke={isCurrentlySounding ? '#FEF08A' : '#FFFFFF'}
+                  strokeWidth={isCurrentlySounding ? 2.5 : 1.8}
                   className="transition-transform duration-150 group-hover:scale-110"
                 />
 
@@ -269,7 +337,7 @@ export function GugoskiFretboardStage({
         </svg>
       </div>
 
-      {/* Bottom Scale Badge & Legend Bar (Matches Red Scale Card in Screenshots 3-5) */}
+      {/* Bottom Scale Badge & Legend Bar */}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-3">
         <div className="inline-flex items-center gap-3 rounded-lg border-2 border-white bg-[#EF4444] px-4 py-1.5 shadow-md">
           <span className="font-display text-sm font-extrabold tracking-tight text-white">
@@ -291,7 +359,11 @@ export function GugoskiFretboardStage({
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-3 w-3 rounded-full border border-white bg-[#16A34A]" />
-            <span>Цільові ноти акорду / фрази (з’єднані лінією)</span>
+            <span>Цільові ноти такту (з’єднані лінією)</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-full border-2 border-yellow-300 bg-[#15803D]" />
+            <span>Нота, що звучить зараз</span>
           </span>
         </div>
       </div>
