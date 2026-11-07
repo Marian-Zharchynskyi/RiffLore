@@ -23,9 +23,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'RiffLore — Interactive Guitar Theory & Rock Lore Studio',
+  title: 'RiffLore — Interactive Guitar Method, Drills & Riff Deconstructor',
   description:
-    'Інтерактивна платформа для гітаристів: музична теорія, живий SVG-гриф зі звуком Tone.js, розбір культових рифів та лор рок-музики.',
+    'Interactive guitar learning platform (UA / EN): step-by-step fretboard lessons from zero, 60-second note drills, spaced repetition, and Nikola Gugoski-style visual Riff & Solo Deconstructor.',
 };
 
 export default function RootLayout({
@@ -38,17 +38,16 @@ export default function RootLayout({
       lang="uk"
       className={`${spaceGrotesk.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} dark`}
     >
-      <body className="min-h-screen bg-[#0B0C0E] text-[#F3F4F6] selection:bg-amber-500/30 selection:text-amber-200 flex flex-col">
+      <body className="min-h-screen bg-[#121211] text-[#F3F4F6] selection:bg-[#CEA15A]/30 selection:text-amber-200 flex flex-col">
         <StudioHeader />
         <main className="flex-1">{children}</main>
-        <footer className="mt-16 border-t border-white/10 bg-[#0B0C0E] py-8">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-xs text-zinc-500 sm:flex-row sm:px-6">
+        <footer className="mt-16 border-t border-[#2C2A28] bg-[#121211] py-6">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 text-xs text-zinc-500 sm:flex-row sm:px-6">
             <div className="font-mono">
-              <strong className="text-zinc-300">RIFFLORE STUDIO</strong> · Tube Amp &amp; Boutique
-              Design System · Feature-Sliced Architecture
+              <strong className="text-zinc-300">RIFFLORE STAGE v2.0</strong> · App-First Studio Design · UA / EN
             </div>
             <div className="font-mono">
-              Powered by Next.js · Tonal.js · Tone.js · Open-Access Dual-Mode
+              Next.js · Tonal.js · Tone.js · Feature-Sliced Architecture
             </div>
           </div>
         </footer>

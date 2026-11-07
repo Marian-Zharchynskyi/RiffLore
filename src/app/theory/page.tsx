@@ -1,7 +1,5 @@
-import { getTheoryModules } from '@/entities/lesson';
-import { TheoryCurriculumView } from '@/views/theory-curriculum';
+import { HomeView } from '@/views/home';
 
-export default async function TheoryPage() {
-  const modules = await getTheoryModules();
-  return <TheoryCurriculumView modules={modules} />;
+export default function TheoryPage() {
+  return <HomeView />;
 }
