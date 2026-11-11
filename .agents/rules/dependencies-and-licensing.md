@@ -44,3 +44,6 @@ Keep this registry updated when adding major packages:
 | `@coderline/alphatab` | MPL-2.0 | Tier 2 | Guitar tab rendering — import as unmodified package |
 | `three`, `@react-three/fiber`, `@react-three/drei` | MIT | Tier 1 | 3D WebGL / Three.js rendering |
 | `Space Grotesk`, `Plus Jakarta Sans`, `JetBrains Mono` | OFL-1.1 | Tier 1 | Google Fonts for "Tube Amp & Boutique Studio" theme |
+| `expo`, `react-native`, `react-native-web`, `expo-status-bar` | MIT | Tier 1 | React Native mobile app (`mobile/`) & Expo Go / Web runtime |
+| `react-native-svg`, `react-native-safe-area-context` | MIT | Tier 1 | Vector chord/fretboard diagrams & safe area layout on iOS/Android |
+| `lucide-react-native` / `@expo/vector-icons` | ISC / MIT | Tier 1 | Mobile icons for React Native |

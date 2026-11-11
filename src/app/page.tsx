@@ -1,5 +1,5 @@
-import { HomeView } from '@/views/home';
+import { MobileDesignLabView } from '@/views/mobile-design-lab';
 
 export default function HomePage() {
-  return <HomeView />;
+  return <MobileDesignLabView />;
 }

@@ -17,6 +17,7 @@ This root `AGENTS.md` holds universal, always-relevant standards. Narrower archi
 | `.agents/rules/architecture-and-patterns.md` | `src/**` — **Feature-Sliced Design (FSD)** layers, Next.js App Router conventions, future DB/Blob migration readiness |
 | `.agents/rules/design-system.md` | `src/**` — **"Tube Amp & Boutique Studio"** tokens, semantic interval color coding, typography, `shadcn/ui` conventions |
 | `.agents/rules/music-and-audio.md` | `src/shared/lib/music/**`, `src/shared/lib/audio/**`, `src/widgets/**` — Tonal.js math, Tone.js Web Audio lifecycle, AlphaTab |
+| `docs/MOBILE_DESIGN_AND_CURRICULUM_SPEC.md` | `mobile/**`, `src/views/mobile-design-lab/**`, `src/entities/course/**` — **Mobile App (React Native / Expo)**, **"1. Honey & Espresso + Soft Elevated"** design system, visual references (`Examples`), and **Zero-to-Pro 8-Module / 29-Lesson Curriculum** (`Lessons` books) |
 
 ---
 
